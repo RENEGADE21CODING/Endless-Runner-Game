@@ -1,113 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Endless Runner</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #87CEEB;
-        }
-        #gameCanvas {
-            display: block;
-            margin: auto;
-            background: #ffffff;
-            border: 2px solid #000;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platicker - A Platform Clicker Game</title>
+  <style>
+    /* Main screen container */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Top 20% (empty space for future elements) */
+    .top-bar {
+      height: 20%;
+      background-color: lightgray; /* Adjust or remove if needed */
+    }
+    /* Game container (bottom 80%) */
+    .game-container {
+      height: 80%;
+      background-color: #f0f0f0; /* Light shade of gray for the game background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
 
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <!-- Top bar for future elements -->
+  <div class="top-bar">
+    <!-- Future elements can go here -->
+  </div>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+  <!-- Game container -->
+  <div class="game-container" id="gameContainer">
+    <!-- Game canvas or elements will go here -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+  </div>
 
-        let player = { x: 50, y: 300, width: 30, height: 30, speed: 5 };
-        let bullets = [];
-        let enemies = [];
-        let enemySpeed = 3;
-        let score = 0;
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-        function spawnEnemy() {
-            let enemy = { x: canvas.width, y: Math.random() * (canvas.height - 30), width: 30, height: 30 };
-            enemies.push(enemy);
-        }
+    // Example game setup code
+    function startGame() {
+      ctx.fillStyle = 'blue';
+      ctx.fillRect(50, 50, 100, 100); // Example player character
+    }
 
-        function update() {
-            // Move player with arrow keys
-            document.addEventListener('keydown', (event) => {
-                if (event.key === "ArrowUp" && player.y > 0) {
-                    player.y -= player.speed;
-                } else if (event.key === "ArrowDown" && player.y < canvas.height - player.height) {
-                    player.y += player.speed;
-                } else if (event.key === " ") {
-                    bullets.push({ x: player.x + player.width, y: player.y + player.height / 2 - 5, width: 10, height: 5 });
-                }
-            });
-
-            // Update bullets
-            bullets.forEach((bullet, index) => {
-                bullet.x += 10;
-                if (bullet.x > canvas.width) {
-                    bullets.splice(index, 1);
-                }
-            });
-
-            // Update enemies
-            enemies.forEach((enemy, index) => {
-                enemy.x -= enemySpeed;
-                if (enemy.x + enemy.width < 0) {
-                    enemies.splice(index, 1);
-                    score++;
-                }
-            });
-
-            // Check for collisions
-            bullets.forEach((bullet, bIndex) => {
-                enemies.forEach((enemy, eIndex) => {
-                    if (bullet.x < enemy.x + enemy.width &&
-                        bullet.x + bullet.width > enemy.x &&
-                        bullet.y < enemy.y + enemy.height &&
-                        bullet.y + bullet.height > enemy.y) {
-                        bullets.splice(bIndex, 1);
-                        enemies.splice(eIndex, 1);
-                    }
-                });
-            });
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "green";
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-
-            // Draw bullets
-            ctx.fillStyle = "red";
-            bullets.forEach(bullet => ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height));
-
-            // Draw enemies
-            ctx.fillStyle = "blue";
-            enemies.forEach(enemy => ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height));
-
-            // Draw score
-            ctx.fillStyle = "black";
-            ctx.font = "20px Arial";
-            ctx.fillText(`Score: ${score}`, 10, 20);
-        }
-
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        setInterval(spawnEnemy, 2000);
-        gameLoop();
-    </script>
-
+    startGame();
+  </script>
 </body>
 </html>
