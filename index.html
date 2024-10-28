@@ -31,13 +31,12 @@
     }
     /* Settings button styles */
     .settings-button {
-      background-color: gray;
-      color: white;
+      background: url('https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/JellySettingsButton.png') no-repeat center;
+      background-size: contain;
+      width: 50px; /* Set appropriate width */
+      height: 50px; /* Set appropriate height */
       border: none;
-      padding: 10px 20px;
       cursor: pointer;
-      border-radius: 5px;
-      font-size: 16px;
     }
   </style>
 </head>
@@ -45,7 +44,7 @@
 
   <!-- Top bar for future elements -->
   <div class="top-bar">
-    <button class="settings-button">Settings</button>
+    <button class="settings-button" aria-label="Settings"></button>
   </div>
 
   <!-- Game container -->
@@ -59,61 +58,56 @@
 
     // Load the player image
     const playerImage = new Image();
-    playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png'; // Use the raw URL
+    playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png';
 
     // Player properties
     const player = {
       x: 100,
-      y: 449, // Spawn 1 pixel above the platform
+      y: 449,
       size: 50,
-      velocityY: 0, // Vertical velocity for gravity
-      gravity: 0.5, // Gravity force
-      isOnPlatform: false // Flag to check if the player is on the platform
+      velocityY: 0,
+      gravity: 0.5,
+      isOnPlatform: false
     };
 
-    // Platform properties (set in pixels)
+    // Platform properties
     const platform = {
       width: 160,
       height: 20,
-      x: -20, // Move the platform further to the left
+      x: -20,
       y: 450
     };
 
-    playerImage.onload = () => requestAnimationFrame(gameLoop); // Start the game loop once the image loads
+    playerImage.onload = () => requestAnimationFrame(gameLoop);
 
     function update() {
-      // Apply gravity
       player.velocityY += player.gravity;
       player.y += player.velocityY;
 
-      // Check for collision with the platform
-      if (player.y + player.size > platform.y && 
+      if (player.y + player.size > platform.y &&
           player.x < platform.x + platform.width &&
           player.x + player.size > platform.x) {
-        player.y = platform.y - player.size; // Place player on top of the platform
-        player.velocityY = 0; // Reset velocity
-        player.isOnPlatform = true; // Set the flag to true
+        player.y = platform.y - player.size;
+        player.velocityY = 0;
+        player.isOnPlatform = true;
       } else {
-        player.isOnPlatform = false; // Set the flag to false
+        player.isOnPlatform = false;
       }
     }
 
     function draw() {
-      // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw the black platform
       ctx.fillStyle = 'black';
       ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
 
-      // Draw the player image
       ctx.drawImage(playerImage, player.x, player.y, player.size, player.size);
     }
 
     function gameLoop() {
-      update(); // Update player position and physics
-      draw(); // Call the draw function
-      requestAnimationFrame(gameLoop); // Loop the game
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
     }
   </script>
 </body>
