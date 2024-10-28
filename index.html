@@ -50,8 +50,14 @@
 
     // Player's position
     let playerX = 100; // Starting X position
-    let playerY = 100; // Starting Y position
+    let playerY = 500; // Starting Y position (adjust as needed)
     const playerSize = 50; // Size of the player (adjust as needed)
+
+    // Platform properties (set in pixels)
+    const platformWidth = 160; // Width of the platform in pixels
+    const platformHeight = 20; // Height of the platform in pixels
+    const platformX = 0; // Position from the left
+    const platformY = 510; // Raised 15 pixels from the bottom (adjust as needed)
 
     playerImage.onload = function() {
       // Start the game after the image loads
@@ -61,6 +67,9 @@
     function startGame() {
       // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw the black platform
+      ctx.fillStyle = 'black';
+      ctx.fillRect(platformX, platformY, platformWidth, platformHeight);
       // Draw the player image
       ctx.drawImage(playerImage, playerX, playerY, playerSize, playerSize);
     }
