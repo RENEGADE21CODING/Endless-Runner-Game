@@ -16,28 +16,28 @@
     /* Top 20% (empty space for future elements) */
     .top-bar {
       height: 20%;
-      background-color: lightgray; /* Adjust or remove if needed */
+      background-color: lightgray;
       display: flex;
-      justify-content: flex-end; /* Align contents to the right */
-      padding: 10px; /* Add some padding */
+      justify-content: flex-end;
+      padding: 10px;
     }
     /* Game container (bottom 80%) */
     .game-container {
       height: 80%;
-      background-color: #f0f0f0; /* Light shade of gray for the game background */
+      background-color: #f0f0f0;
       display: flex;
       justify-content: center;
       align-items: center;
     }
     /* Settings button styles */
     .settings-button {
-      background-color: gray; /* Button background color */
-      color: white; /* Text color */
-      border: none; /* Remove default border */
-      padding: 10px 20px; /* Button padding */
-      cursor: pointer; /* Pointer cursor on hover */
-      border-radius: 5px; /* Rounded corners */
-      font-size: 16px; /* Font size */
+      background-color: gray;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -49,7 +49,7 @@
   </div>
 
   <!-- Game container -->
-  <div class="game-container" id="gameContainer">
+  <div class="game-container">
     <canvas id="gameCanvas" width="800" height="600"></canvas>
   </div>
 
@@ -61,39 +61,39 @@
     const playerImage = new Image();
     playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png'; // Use the raw URL
 
-    // Player's position
-    let playerX = 100; // Starting X position
-    let playerY = 500; // Starting Y position (adjust as needed)
-    const playerSize = 50; // Size of the player (adjust as needed)
-
-    // Platform properties (set in pixels)
-    const platformWidth = 160; // Width of the platform in pixels
-    const platformHeight = 20; // Height of the platform in pixels
-    const platformX = 10; // Position from the left (further to the left)
-    const platformY = 450; // Higher up on the Y-axis (adjust as needed)
-
-    playerImage.onload = function() {
-      // Start the game after the image loads
-      startGame();
+    // Player properties
+    const player = {
+      x: 100,
+      y: 500,
+      size: 50
     };
 
-    function startGame() {
+    // Platform properties (set in pixels)
+    const platform = {
+      width: 160,
+      height: 20,
+      x: -20, // Move the platform further to the left
+      y: 450
+    };
+
+    playerImage.onload = () => requestAnimationFrame(gameLoop); // Start the game loop once the image loads
+
+    function draw() {
       // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       // Draw the black platform
       ctx.fillStyle = 'black';
-      ctx.fillRect(platformX, platformY, platformWidth, platformHeight);
+      ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+
       // Draw the player image
-      ctx.drawImage(playerImage, playerX, playerY, playerSize, playerSize);
+      ctx.drawImage(playerImage, player.x, player.y, player.size, player.size);
     }
 
-    // Example of a game loop
     function gameLoop() {
-      startGame();
+      draw(); // Call the draw function
       requestAnimationFrame(gameLoop); // Loop the game
     }
-
-    gameLoop(); // Start the game loop
   </script>
 </body>
 </html>
