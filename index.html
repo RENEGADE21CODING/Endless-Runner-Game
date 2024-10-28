@@ -37,7 +37,6 @@
 
   <!-- Game container -->
   <div class="game-container" id="gameContainer">
-    <!-- Game canvas or elements will go here -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
   </div>
 
@@ -45,13 +44,34 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Example game setup code
+    // Load the player image
+    const playerImage = new Image();
+    playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png'; // Use the raw URL
+
+    // Player's position
+    let playerX = 100; // Starting X position
+    let playerY = 100; // Starting Y position
+    const playerSize = 50; // Size of the player (adjust as needed)
+
+    playerImage.onload = function() {
+      // Start the game after the image loads
+      startGame();
+    };
+
     function startGame() {
-      ctx.fillStyle = 'blue';
-      ctx.fillRect(50, 50, 100, 100); // Example player character
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw the player image
+      ctx.drawImage(playerImage, playerX, playerY, playerSize, playerSize);
     }
 
-    startGame();
+    // Example of a game loop
+    function gameLoop() {
+      startGame();
+      requestAnimationFrame(gameLoop); // Loop the game
+    }
+
+    gameLoop(); // Start the game loop
   </script>
 </body>
 </html>
