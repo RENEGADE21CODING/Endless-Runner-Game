@@ -17,6 +17,9 @@
     .top-bar {
       height: 20%;
       background-color: lightgray; /* Adjust or remove if needed */
+      display: flex;
+      justify-content: flex-end; /* Align contents to the right */
+      padding: 10px; /* Add some padding */
     }
     /* Game container (bottom 80%) */
     .game-container {
@@ -26,13 +29,23 @@
       justify-content: center;
       align-items: center;
     }
+    /* Settings button styles */
+    .settings-button {
+      background-color: gray; /* Button background color */
+      color: white; /* Text color */
+      border: none; /* Remove default border */
+      padding: 10px 20px; /* Button padding */
+      cursor: pointer; /* Pointer cursor on hover */
+      border-radius: 5px; /* Rounded corners */
+      font-size: 16px; /* Font size */
+    }
   </style>
 </head>
 <body>
 
   <!-- Top bar for future elements -->
   <div class="top-bar">
-    <!-- Future elements can go here -->
+    <button class="settings-button">Settings</button>
   </div>
 
   <!-- Game container -->
