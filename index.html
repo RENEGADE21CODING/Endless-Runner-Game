@@ -3,17 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Platicker - A Platform Clicker Game</title>
+  <title>Platicker - Side Scrolling Game</title>
   <style>
-    /* Main screen container */
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
-      display: flex;
-      flex-direction: column;
+      overflow: hidden; /* Prevent scrolling */
     }
-    /* Top 20% (empty space for future elements) */
     .top-bar {
       height: 20%;
       background-color: lightgray;
@@ -21,20 +18,16 @@
       justify-content: flex-end;
       padding: 10px;
     }
-    /* Game container (bottom 80%) */
     .game-container {
       height: 80%;
-      background-color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      position: relative;
+      overflow: hidden; /* Hide overflow for scrolling effect */
     }
-    /* Settings button styles */
     .settings-button {
       background: url('https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/JellySettingsButton.png') no-repeat center;
       background-size: contain;
-      width: 60px; /* Updated width */
-      height: 60px; /* Updated height */
+      width: 60px;
+      height: 60px;
       border: none;
       cursor: pointer;
     }
@@ -42,12 +35,10 @@
 </head>
 <body>
 
-  <!-- Top bar for future elements -->
   <div class="top-bar">
     <button class="settings-button" aria-label="Settings"></button>
   </div>
 
-  <!-- Game container -->
   <div class="game-container">
     <canvas id="gameCanvas" width="800" height="600"></canvas>
   </div>
@@ -56,59 +47,79 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Load the player image
+    // Load player image
     const playerImage = new Image();
     playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png';
 
     // Player properties
     const player = {
       x: 100,
-      y: 449,
+      y: 450,
       size: 50,
       velocityY: 0,
       gravity: 0.5,
-      isOnPlatform: false
+      isOnPlatform: false,
+      speed: 2 // Player speed for left/right movement
     };
 
-    // Platform properties
-    const platform = {
-      width: 160,
-      height: 20,
-      x: -20,
-      y: 450
+    // Background properties
+    const background = {
+      x: 0,
+      speed: 1 // Speed of the background scrolling
     };
-
-    playerImage.onload = () => requestAnimationFrame(gameLoop);
 
     function update() {
+      // Player movement (A/D keys and Arrow keys)
+      if (keys['ArrowRight'] || keys['d']) {
+        player.x += player.speed;
+        background.x -= background.speed; // Scroll the background
+      }
+      if (keys['ArrowLeft'] || keys['a']) {
+        player.x -= player.speed;
+        background.x += background.speed; // Scroll the background
+      }
+
+      // Gravity and platform collision (you may want to modify for multiple platforms)
       player.velocityY += player.gravity;
       player.y += player.velocityY;
 
-      if (player.y + player.size > platform.y &&
-          player.x < platform.x + platform.width &&
-          player.x + player.size > platform.x) {
-        player.y = platform.y - player.size;
+      // Check for landing on platform or ground
+      // Implement your platform logic here...
+
+      // Example reset position for demonstration
+      if (player.y + player.size > canvas.height) {
+        player.y = canvas.height - player.size; // Reset player to ground level
         player.velocityY = 0;
-        player.isOnPlatform = true;
-      } else {
-        player.isOnPlatform = false;
       }
     }
 
     function draw() {
+      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = 'black';
-      ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+      // Draw scrolling background (you can implement an actual background image)
+      ctx.fillStyle = 'lightblue'; // Example background color
+      ctx.fillRect(background.x, 0, canvas.width * 2, canvas.height); // Adjust for scrolling effect
 
+      // Draw player
       ctx.drawImage(playerImage, player.x, player.y, player.size, player.size);
     }
+
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      keys[e.key] = true;
+    });
+    window.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
 
     function gameLoop() {
       update();
       draw();
       requestAnimationFrame(gameLoop);
     }
+
+    playerImage.onload = () => requestAnimationFrame(gameLoop);
   </script>
 </body>
 </html>
