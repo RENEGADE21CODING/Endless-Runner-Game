@@ -65,7 +65,8 @@
       speed: 2,
       jumpPower: -10,
       isOnPlatform: false,
-      canWallJump: false,
+      canWallJump: true, // Allow wall jump initially
+      wallJumped: false,  // Track if wall jump has occurred
       respawning: false // Flag for respawning
     };
 
@@ -80,7 +81,9 @@
       player.x += (keys['ArrowRight'] || keys['d'] ? player.speed : 0) - (keys['ArrowLeft'] || keys['a'] ? player.speed : 0);
 
       // Jumping
-      if ((keys['ArrowUp'] || keys['w']) && (player.isOnPlatform || player.canWallJump)) jump();
+      if ((keys['ArrowUp'] || keys['w']) && (player.isOnPlatform || (player.canWallJump && !player.wallJumped))) {
+        jump();
+      }
 
       // Gravity
       player.velocityY += player.gravity;
@@ -94,8 +97,13 @@
     }
 
     function jump() {
-      player.velocityY = player.isOnPlatform ? player.jumpPower : (player.canWallJump ? player.jumpPower * 0.5 : 0);
+      player.velocityY = player.isOnPlatform ? player.jumpPower : (player.canWallJump && !player.wallJumped ? player.jumpPower * 0.5 : 0);
       player.isOnPlatform = false;
+
+      // Set wall jump flag if jumping off a wall
+      if (player.canWallJump && !player.wallJumped) {
+        player.wallJumped = true; // Mark that wall jump has occurred
+      }
     }
 
     function handleCollisions() {
@@ -105,7 +113,8 @@
           player.y = platform.y - player.size;
           player.velocityY = 0;
           player.isOnPlatform = true;
-          player.canWallJump = false;
+          player.canWallJump = true; // Reset wall jump ability when landing on platform
+          player.wallJumped = false; // Allow another wall jump when landing on a platform
         }
       }
 
@@ -120,7 +129,8 @@
           player.y = wall.y - player.size;
           player.velocityY = 0;
           player.isOnPlatform = true;
-          player.canWallJump = false;
+          player.canWallJump = true; // Reset wall jump ability when landing on wall
+          player.wallJumped = false; // Allow another wall jump when landing on a wall
         } else if (player.velocityY < 0 && player.y - player.velocityY >= wall.y + wall.height) {
           player.y = wall.y + wall.height;
           player.velocityY = 0;
@@ -139,7 +149,8 @@
         player.y = platform.y - 50; // Spawn above the platform
         player.velocityY = 0;
         player.isOnPlatform = false;
-        player.canWallJump = false;
+        player.canWallJump = false; // Prevent immediate wall jump after respawn
+        player.wallJumped = false; // Reset wall jump flag
         player.respawning = false; // Reset respawning flag
       }, 500); // Wait for 0.5 seconds before respawning
     }
