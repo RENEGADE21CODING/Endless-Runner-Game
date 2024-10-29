@@ -11,7 +11,7 @@
       flex-direction: column;
       align-items: center;
       margin: 0;
-      background-color: #f0f0f0;
+      background-color: #f0f0f0; /* Light shade of gray */
       overflow: hidden;
     }
     .top-bar {
@@ -45,9 +45,22 @@
     .upgrade-button:active {
       transform: scale(0.95);
     }
+    .click-cash {
+      width: 120px;
+      height: auto;
+      cursor: pointer;
+      position: absolute;
+      bottom: 20%;
+      right: 2%;
+    }
+    .setting-button {
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+    }
     .game-bar {
       position: relative;
-      width: 100vw;
+      width: 100%;
       height: 80vh;
       background-color: #f0f0f0;
       overflow: hidden;
@@ -57,18 +70,8 @@
       width: 20%;
       height: 20px;
       background-color: #2b0001;
-      left: 20%;
-      bottom: 20%;
-    }
-    .click-cash {
-      width: 120px;
-      height: auto;
-      position: absolute;
-      right: 2%;
-      bottom: 25%;
-      cursor: pointer;
-      transition: transform 0.1s, filter 0.1s;
-      filter: brightness(0.9);
+      left: 40%;
+      top: 65%; /* Position below player spawn */
     }
     .player {
       position: absolute;
@@ -76,6 +79,9 @@
       height: 50px;
       background-image: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true');
       background-size: cover;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
   </style>
 </head>
@@ -93,12 +99,13 @@
       <div class="upgrade-info" id="automaticInfo">Current Cash Per Second: $0.00</div>
     </div>
   </div>
+  <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/JellySettingsButton.png?raw=true" class="setting-button" id="settingsButton">
 </div>
 
 <div class="game-bar" id="gameBar">
   <div class="platform" id="platform"></div>
-  <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
   <div class="player" id="player"></div>
+  <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
 </div>
 
 <script>
@@ -108,78 +115,69 @@
   let upgradeClickCost = 10.00;
   let upgradeAutomaticCost = 10.00;
 
-  const gameBar = document.getElementById('gameBar');
   const player = document.getElementById('player');
   const platform = document.getElementById('platform');
-  const clickCash = document.getElementById('clickCash');
+  const gameBar = document.getElementById('gameBar');
 
-  let playerX = 150, playerY = 0;
-  let playerVelocityX = 0, playerVelocityY = 0;
+  let playerX = gameBar.offsetWidth / 2;
+  let playerY = gameBar.offsetHeight * 0.5;
+  let playerVelocityX = 0;
+  let playerVelocityY = 0;
   const gravity = 0.5;
-  const jumpStrength = -10;
-  const moveSpeed = 5;
-  let isOnGround = false;
+  const jumpStrength = 10;
+  const speed = 5;
+  let isJumping = false;
 
-  function updateDisplay() {
-    document.getElementById('scoreDisplay').textContent = `Cash: $${cash.toFixed(2)}`;
-    document.getElementById('clickInfo').textContent = `Current Cash Per Click: $${cashPerClick.toFixed(2)}`;
-    document.getElementById('automaticInfo').textContent = `Current Cash Per Second: $${cashPerSecond.toFixed(2)}`;
-  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'a' || e.key === 'ArrowLeft') {
+      playerVelocityX = -speed;
+    }
+    if (e.key === 'd' || e.key === 'ArrowRight') {
+      playerVelocityX = speed;
+    }
+    if ((e.key === 'w' || e.key === 'ArrowUp') && !isJumping) {
+      playerVelocityY = -jumpStrength;
+      isJumping = true;
+    }
+  });
 
-  function gameLoop() {
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'a' || e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'ArrowRight') {
+      playerVelocityX = 0;
+    }
+  });
+
+  function update() {
     playerVelocityY += gravity;
     playerX += playerVelocityX;
     playerY += playerVelocityY;
 
     // Collision detection with the platform
-    const platformTop = gameBar.offsetHeight * 0.8 - platform.offsetHeight;
-    if (playerX + player.offsetWidth > platform.offsetLeft && playerX < platform.offsetLeft + platform.offsetWidth &&
-        playerY + player.offsetHeight > platformTop && playerY + player.offsetHeight < platformTop + platform.offsetHeight + playerVelocityY) {
-      playerY = platformTop - player.offsetHeight;
+    const platformTop = platform.offsetTop;
+    const platformBottom = platformTop + platform.offsetHeight;
+    const platformLeft = platform.offsetLeft;
+    const platformRight = platformLeft + platform.offsetWidth;
+    const playerBottom = playerY + player.offsetHeight;
+
+    if (playerBottom >= platformTop && playerX > platformLeft && playerX < platformRight) {
+      playerY = platformTop - player.offsetHeight; // Place player on top of the platform
       playerVelocityY = 0;
-      isOnGround = true;
-    } else {
-      isOnGround = false;
+      isJumping = false;
     }
 
-    // Update player position
     player.style.left = `${playerX}px`;
     player.style.top = `${playerY}px`;
 
-    // Center camera on the player
-    gameBar.scrollLeft = playerX - gameBar.offsetWidth / 2 + player.offsetWidth / 2;
-    gameBar.scrollTop = playerY - gameBar.offsetHeight / 2 + player.offsetHeight / 2;
+    // Camera positioning (centered slightly above the player)
+    const cameraX = Math.max(0, playerX - gameBar.offsetWidth / 2);
+    const cameraY = Math.max(0, playerY - gameBar.offsetHeight / 2 + 50);
+    gameBar.scrollLeft = cameraX;
+    gameBar.scrollTop = cameraY;
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(update);
   }
 
-  function handleKeyDown(event) {
-    switch (event.key) {
-      case 'a':
-      case 'ArrowLeft':
-        playerVelocityX = -moveSpeed;
-        break;
-      case 'd':
-      case 'ArrowRight':
-        playerVelocityX = moveSpeed;
-        break;
-      case 'w':
-      case 'ArrowUp':
-        if (isOnGround) playerVelocityY = jumpStrength;
-        break;
-    }
-  }
-
-  function handleKeyUp(event) {
-    if (event.key === 'a' || event.key === 'ArrowLeft' || event.key === 'd' || event.key === 'ArrowRight') {
-      playerVelocityX = 0;
-    }
-  }
-
-  document.addEventListener('keydown', handleKeyDown);
-  document.addEventListener('keyup', handleKeyUp);
-  gameLoop();
-  updateDisplay();
+  update();
 </script>
 
 </body>
