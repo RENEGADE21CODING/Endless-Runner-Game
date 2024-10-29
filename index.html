@@ -13,17 +13,17 @@
     }
     .top-bar {
       height: 20%;
-      background-color: #d3d3d3; /* Very light gray for top bar */
+      background-color: #d3d3d3;
       display: flex;
       justify-content: flex-end;
       padding: 10px;
     }
     .game-container {
-      height: 80%; /* Full height for game container */
-      width: 100%; /* Full width for game container */
-      background-color: #eaeaea; /* Very light gray background */
+      height: 80%;
+      width: 100%;
+      background-color: #eaeaea;
       position: relative;
-      overflow: hidden; /* Hide overflow for scrolling effect */
+      overflow: hidden;
     }
     .settings-button {
       background: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/JellySettingsButton.png?raw=true') no-repeat center;
@@ -89,7 +89,6 @@
     }
 
     function checkPlatformCollision() {
-      // Detect collision only if the player is falling and within platform's horizontal bounds
       if (
         player.dy >= 0 && // Player is falling
         player.y + player.height <= platform.y + platform.height && // Player is above platform
@@ -99,6 +98,7 @@
       ) {
         player.isOnGround = true;
         player.dy = 0; // Stop downward movement
+        player.y = platform.y - player.height; // Position player on top of platform
       } else {
         player.isOnGround = false;
       }
