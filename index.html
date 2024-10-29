@@ -11,7 +11,7 @@
       flex-direction: column;
       align-items: center;
       margin: 0;
-      background-color: #f0f0f0; /* Light shade of gray */
+      background-color: #f0f0f0;
       overflow: hidden;
     }
     .top-bar {
@@ -48,10 +48,12 @@
     .click-cash {
       width: 120px;
       height: auto;
-      cursor: pointer;
       position: absolute;
-      bottom: 20%;
       right: 2%;
+      bottom: 25%;
+      cursor: pointer;
+      transition: transform 0.1s, filter 0.1s;
+      filter: brightness(0.9);
     }
     .setting-button {
       width: 60px;
@@ -64,6 +66,9 @@
       height: 80vh;
       background-color: #f0f0f0;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .platform {
       position: absolute;
@@ -71,7 +76,7 @@
       height: 20px;
       background-color: #2b0001;
       left: 40%;
-      top: 65%; /* Position below player spawn */
+      top: 60%;
     }
     .player {
       position: absolute;
@@ -79,106 +84,85 @@
       height: 50px;
       background-image: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true');
       background-size: cover;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
     }
   </style>
 </head>
 <body>
-
-<div class="top-bar">
-  <div class="score" id="scoreDisplay">Cash: $0.00</div>
-  <div class="upgrades">
-    <div>
-      <button class="upgrade-button" id="upgradeClickButton">Buy More Cash Per Click (Cost: $10.00)</button>
-      <div class="upgrade-info" id="clickInfo">Current Cash Per Click: $1.00</div>
+  <div class="top-bar">
+    <div class="score" id="scoreDisplay">Cash: $0.00</div>
+    <div class="upgrades">
+      <div>
+        <button class="upgrade-button" id="upgradeClickButton">Buy More Cash Per Click (Cost: $10.00)</button>
+        <div class="upgrade-info" id="clickInfo">Current Cash Per Click: $1.00</div>
+      </div>
+      <div>
+        <button class="upgrade-button" id="upgradeAutomaticButton">Buy More Cash Per Second (Cost: $10.00)</button>
+        <div class="upgrade-info" id="automaticInfo">Current Cash Per Second: $0.00</div>
+      </div>
     </div>
-    <div>
-      <button class="upgrade-button" id="upgradeAutomaticButton">Buy More Cash Per Second (Cost: $10.00)</button>
-      <div class="upgrade-info" id="automaticInfo">Current Cash Per Second: $0.00</div>
-    </div>
+    <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/JellySettingsButton.png?raw=true" class="setting-button" id="settingsButton">
   </div>
-  <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/JellySettingsButton.png?raw=true" class="setting-button" id="settingsButton">
-</div>
 
-<div class="game-bar" id="gameBar">
-  <div class="platform" id="platform"></div>
-  <div class="player" id="player"></div>
-  <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
-</div>
+  <div class="game-bar" id="gameBar">
+    <div class="platform" id="platform"></div>
+    <div class="player" id="player"></div>
+    <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
+  </div>
 
-<script>
-  let cash = 0;
-  let cashPerClick = 1.00;
-  let cashPerSecond = 0;
-  let upgradeClickCost = 10.00;
-  let upgradeAutomaticCost = 10.00;
+  <script>
+    const player = document.getElementById('player');
+    const platform = document.getElementById('platform');
+    const gameBar = document.getElementById('gameBar');
+    let playerX = gameBar.clientWidth / 2 - 25; 
+    let playerY = platform.offsetTop - 50; 
+    let playerVelocityX = 0;
+    let playerVelocityY = 0;
+    let gravity = 0.5;
+    let isOnGround = false;
 
-  const player = document.getElementById('player');
-  const platform = document.getElementById('platform');
-  const gameBar = document.getElementById('gameBar');
+    function updatePlayerPosition() {
+      playerVelocityY += gravity;
+      playerY += playerVelocityY;
 
-  let playerX = gameBar.offsetWidth / 2;
-  let playerY = gameBar.offsetHeight * 0.5;
-  let playerVelocityX = 0;
-  let playerVelocityY = 0;
-  const gravity = 0.5;
-  const jumpStrength = 10;
-  const speed = 5;
-  let isJumping = false;
+      if (playerY + player.clientHeight >= platform.offsetTop && playerX + player.clientWidth > platform.offsetLeft && playerX < platform.offsetLeft + platform.clientWidth) {
+        playerY = platform.offsetTop - player.clientHeight;
+        isOnGround = true;
+        playerVelocityY = 0;
+      } else {
+        isOnGround = false;
+      }
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'a' || e.key === 'ArrowLeft') {
-      playerVelocityX = -speed;
-    }
-    if (e.key === 'd' || e.key === 'ArrowRight') {
-      playerVelocityX = speed;
-    }
-    if ((e.key === 'w' || e.key === 'ArrowUp') && !isJumping) {
-      playerVelocityY = -jumpStrength;
-      isJumping = true;
-    }
-  });
+      playerX += playerVelocityX;
+      player.style.left = `${playerX}px`;
+      player.style.top = `${playerY}px`;
 
-  document.addEventListener('keyup', (e) => {
-    if (e.key === 'a' || e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'ArrowRight') {
-      playerVelocityX = 0;
-    }
-  });
-
-  function update() {
-    playerVelocityY += gravity;
-    playerX += playerVelocityX;
-    playerY += playerVelocityY;
-
-    // Collision detection with the platform
-    const platformTop = platform.offsetTop;
-    const platformBottom = platformTop + platform.offsetHeight;
-    const platformLeft = platform.offsetLeft;
-    const platformRight = platformLeft + platform.offsetWidth;
-    const playerBottom = playerY + player.offsetHeight;
-
-    if (playerBottom >= platformTop && playerX > platformLeft && playerX < platformRight) {
-      playerY = platformTop - player.offsetHeight; // Place player on top of the platform
-      playerVelocityY = 0;
-      isJumping = false;
+      const centerX = gameBar.clientWidth / 2 - player.clientWidth / 2;
+      const centerY = gameBar.clientHeight / 2 - player.clientHeight;
+      gameBar.scrollLeft = playerX - centerX;
+      gameBar.scrollTop = playerY - centerY;
     }
 
-    player.style.left = `${playerX}px`;
-    player.style.top = `${playerY}px`;
+    function movePlayer(e) {
+      if (e.key === 'a' || e.key === 'ArrowLeft') {
+        playerVelocityX = -5;
+      } else if (e.key === 'd' || e.key === 'ArrowRight') {
+        playerVelocityX = 5;
+      } else if ((e.key === 'w' || e.key === 'ArrowUp') && isOnGround) {
+        playerVelocityY = -12;
+        isOnGround = false;
+      }
+    }
 
-    // Camera positioning (centered slightly above the player)
-    const cameraX = Math.max(0, playerX - gameBar.offsetWidth / 2);
-    const cameraY = Math.max(0, playerY - gameBar.offsetHeight / 2 + 50);
-    gameBar.scrollLeft = cameraX;
-    gameBar.scrollTop = cameraY;
+    function stopPlayer(e) {
+      if (e.key === 'a' || e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'ArrowRight') {
+        playerVelocityX = 0;
+      }
+    }
 
-    requestAnimationFrame(update);
-  }
+    setInterval(updatePlayerPosition, 20);
 
-  update();
-</script>
-
+    document.addEventListener('keydown', movePlayer);
+    document.addEventListener('keyup', stopPlayer);
+  </script>
 </body>
 </html>
