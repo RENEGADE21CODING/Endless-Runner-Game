@@ -12,6 +12,7 @@
       align-items: center;
       margin: 0;
       background-color: #f0f0f0; /* Light shade of gray */
+      overflow: hidden; /* Prevents scrollbars */
     }
     .top-bar {
       width: 100%;
@@ -48,7 +49,7 @@
       width: 120px;
       height: auto;
       position: absolute;
-      bottom: 10%; /* Adjusted for gameplay */
+      bottom: 25%;
       right: 2%;
       cursor: pointer;
       transition: transform 0.1s, filter 0.1s; /* Include filter transition */
@@ -66,27 +67,29 @@
     }
     .game-bar {
       width: 100%;
-      height: 80vh; /* Game bar height */
+      height: 80vh;
       position: relative;
-      overflow: hidden;
-      background-color: #f0f0f0; /* Same as body */
+      background-color: #e0e0e0; /* Light gray for game bar */
+      overflow: hidden; /* Prevents scrollbars */
     }
     .platform {
-      width: 20%; /* 20% of screen width */
-      height: 20px; /* Height of the platform */
-      background-color: #2b0001; /* Dark platform color */
       position: absolute;
-      bottom: 30%; /* Positioned near the bottom */
-      left: 40%; /* Centered */
+      bottom: 30%; /* Adjust to platform height */
+      left: 50%; /* Center platform */
+      width: 20%; /* 20% of screen width */
+      height: 20px; /* Fixed height */
+      background-color: #2b0001; /* Platform color */
+      transform: translateX(-50%); /* Center the platform */
     }
     .player {
       position: absolute;
-      width: 40px; /* Player width */
-      height: 40px; /* Player height */
+      bottom: 30%; /* Starting on the platform */
+      left: 50%; /* Center player */
+      width: 30px; /* Width of the player */
+      height: 30px; /* Height of the player */
       background-image: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true');
-      background-size: cover; /* Cover the entire player div */
-      bottom: 60%; /* Start position */
-      left: 45%; /* Centered */
+      background-size: cover; /* Cover the entire area */
+      transform: translateX(-50%); /* Center the player */
     }
   </style>
 </head>
@@ -107,10 +110,11 @@
   <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/JellySettingsButton.png?raw=true" class="setting-button" id="settingsButton">
 </div>
 
+<img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
+
 <div class="game-bar">
   <div class="platform" id="platform"></div>
   <div class="player" id="player"></div>
-  <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
 </div>
 
 <script>
@@ -126,18 +130,15 @@
   const upgradeAutomaticButton = document.getElementById('upgradeAutomaticButton');
   const clickInfo = document.getElementById('clickInfo');
   const automaticInfo = document.getElementById('automaticInfo');
+  
   const player = document.getElementById('player');
   const platform = document.getElementById('platform');
 
-  const keys = {
-    left: false,
-    right: false,
-    jump: false,
-  };
-  
   let isJumping = false;
-  let playerVelocityY = 0;
-  const gravity = 0.5; // Gravity effect
+  let gravity = -0.5; // Gravity pulls the player down
+  let playerVelocityY = 0; // Vertical velocity
+  let keys = { left: false, right: false, up: false }; // Key states
+  let playerBottom = 30; // Player's initial bottom position relative to the game bar
 
   function updateDisplay() {
     scoreDisplay.textContent = `Cash: $${cash.toFixed(2)}`;
@@ -187,56 +188,60 @@
 
   setInterval(incrementCash, 1000); // Increase cash every second
 
-  // Player Movement
-  document.addEventListener('keydown', (event) => {
+  // Key down event
+  window.addEventListener('keydown', (event) => {
     if (event.key === 'a' || event.key === 'ArrowLeft') {
-      keys.left = true; // Set left key state
-    } else if (event.key === 'd' || event.key === 'ArrowRight') {
-      keys.right = true; // Set right key state
-    } else if (event.key === 'w' || event.key === 'ArrowUp' || event.key === ' ') {
-      if (!isJumping) { // Allow jump only if not already jumping
-        isJumping = true; // Set jumping state
-        playerVelocityY = -10; // Set upward velocity for jumping
+      keys.left = true;
+    }
+    if (event.key === 'd' || event.key === 'ArrowRight') {
+      keys.right = true;
+    }
+    if (event.key === 'w' || event.key === 'ArrowUp') {
+      if (!isJumping) {
+        isJumping = true; // Start jumping
+        playerVelocityY = 10; // Set initial upward velocity
       }
     }
   });
 
-  document.addEventListener('keyup', (event) => {
+  // Key up event
+  window.addEventListener('keyup', (event) => {
     if (event.key === 'a' || event.key === 'ArrowLeft') {
-      keys.left = false; // Clear left key state
-    } else if (event.key === 'd' || event.key === 'ArrowRight') {
-      keys.right = false; // Clear right key state
+      keys.left = false;
+    }
+    if (event.key === 'd' || event.key === 'ArrowRight') {
+      keys.right = false;
     }
   });
 
   function gameLoop() {
-    // Apply gravity
-    if (isJumping) {
-      playerVelocityY += gravity; // Increase downward velocity
-      const newPositionY = player.offsetTop + playerVelocityY; // Calculate new vertical position
-
-      // Check collision with platform
-      if (newPositionY + player.offsetHeight >= platform.offsetTop) {
-        isJumping = false; // Reset jumping state
-        playerVelocityY = 0; // Reset velocity
-        player.style.bottom = `${30}%`; // Snap player to the platform
-      } else {
-        player.style.bottom = `${newPositionY / window.innerHeight * 100}%`; // Update player position
-      }
-    }
-
-    // Move left or right
+    // Horizontal Movement
     if (keys.left) {
-      player.style.left = `${Math.max(0, player.offsetLeft - 5)}px`; // Move left
+      player.style.left = (parseFloat(player.style.left) - 5) + 'px';
     }
     if (keys.right) {
-      player.style.left = `${Math.min(window.innerWidth - player.offsetWidth, player.offsetLeft + 5)}px`; // Move right
+      player.style.left = (parseFloat(player.style.left) + 5) + 'px';
     }
 
-    requestAnimationFrame(gameLoop); // Loop the game
+    // Jumping and gravity
+    if (isJumping) {
+      playerBottom += playerVelocityY;
+      playerVelocityY += gravity; // Apply gravity to vertical velocity
+
+      if (playerBottom <= 30) {
+        playerBottom = 30; // Reset to the platform
+        isJumping = false; // Reset jumping state
+      }
+    } else {
+      playerBottom = Math.max(playerBottom - gravity, 0); // Ensure player falls
+    }
+
+    player.style.bottom = playerBottom + 'px'; // Update player's bottom position
+    requestAnimationFrame(gameLoop); // Repeat the game loop
   }
 
-  gameLoop(); // Start the game loop
+  // Start the game loop
+  requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
