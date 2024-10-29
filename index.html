@@ -13,7 +13,25 @@
     }
     .top-bar {
       height: 20%;
-      background-color: lightgray;
+      background-color: lightgray; /* Updated background color */
+      display: flex;
+      justify-con
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platicker - Side Scrolling Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden; /* Prevent scrolling */
+    }
+    .top-bar {
+      height: 20%;
+      background-color: lightgray; /* Updated background color */
       display: flex;
       justify-content: flex-end;
       padding: 10px;
@@ -51,15 +69,24 @@
     const playerImage = new Image();
     playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png';
 
+    // Load platform properties
+    const platform = {
+      x: 100, // X position for the platform
+      y: 300, // Y position for the platform
+      width: 200,
+      height: 20
+    };
+
     // Player properties
     const player = {
-      x: 100,
-      y: 450,
+      x: platform.x + 10, // Spawn player slightly off-center on the platform
+      y: platform.y - 50, // Position player above the platform
       size: 50,
       velocityY: 0,
       gravity: 0.5,
-      isOnPlatform: false,
-      speed: 2 // Player speed for left/right movement
+      isOnPlatform: true, // Assume player starts on the platform
+      speed: 2, // Player speed for left/right movement
+      jumpPower: -10 // Jump power
     };
 
     // Background properties
@@ -79,17 +106,30 @@
         background.x += background.speed; // Scroll the background
       }
 
-      // Gravity and platform collision (you may want to modify for multiple platforms)
+      // Jumping (W key or Up Arrow)
+      if ((keys['ArrowUp'] || keys['w']) && player.isOnPlatform) {
+        player.velocityY = player.jumpPower;
+        player.isOnPlatform = false; // Set to false when jumping
+      }
+
+      // Gravity and platform collision
       player.velocityY += player.gravity;
       player.y += player.velocityY;
 
-      // Check for landing on platform or ground
-      // Implement your platform logic here...
+      // Check for landing on the platform
+      if (player.x + player.size > platform.x && player.x < platform.x + platform.width) {
+        if (player.y + player.size >= platform.y) { // Check if player is above the platform
+          player.y = platform.y - player.size; // Land on top of platform
+          player.velocityY = 0;
+          player.isOnPlatform = true; // Reset jumping ability
+        }
+      }
 
       // Example reset position for demonstration
       if (player.y + player.size > canvas.height) {
         player.y = canvas.height - player.size; // Reset player to ground level
         player.velocityY = 0;
+        player.isOnPlatform = false; // Prevent landing if on the ground
       }
     }
 
@@ -100,6 +140,10 @@
       // Draw scrolling background (you can implement an actual background image)
       ctx.fillStyle = 'lightblue'; // Example background color
       ctx.fillRect(background.x, 0, canvas.width * 2, canvas.height); // Adjust for scrolling effect
+
+      // Draw platform
+      ctx.fillStyle = 'black';
+      ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
 
       // Draw player
       ctx.drawImage(playerImage, player.x, player.y, player.size, player.size);
