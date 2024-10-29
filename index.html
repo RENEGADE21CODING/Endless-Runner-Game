@@ -88,6 +88,7 @@
     }
 
     function movePlayer(direction) {
+      // Move player left or right
       player.x += direction;
       background.x += (direction > 0 ? -background.speed : background.speed); // Scroll the background
     }
@@ -109,9 +110,17 @@
 
       // Check wall collision
       if (player.x + player.size > wall.x && player.x < wall.x + wall.width) {
+        // Horizontal collision
         if (player.y + player.size > wall.y && player.y < wall.y + wall.height) {
-          player.y = wall.y - player.size; // Stop player at wall
-          player.velocityY = 0; // Prevent falling through the wall
+          // Check which side the player is colliding from
+          if (player.velocityY >= 0) { // Coming from above
+            player.y = wall.y - player.size; // Stop at the top of the wall
+            player.velocityY = 0; // Prevent falling through
+          } else if (player.velocityY < 0) { // Coming from below
+            player.y = wall.y + wall.height; // Stop below the wall
+            player.velocityY = 0; // Prevent falling through
+          }
+          player.isOnPlatform = false; // Reset jumping ability
         }
       }
     }
