@@ -13,7 +13,7 @@
     }
     .top-bar {
       height: 20%;
-      background-color: lightgray; /* Updated background color */
+      background-color: lightgray; /* Top bar color */
       display: flex;
       justify-content: flex-end;
       padding: 10px;
@@ -47,105 +47,91 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Load player image
+    // Load images
     const playerImage = new Image();
     playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png';
 
-    // Load platform properties
-    const platform = {
-      x: 100, // X position for the platform
-      y: 300, // Y position for the platform
-      width: 200,
-      height: 20
-    };
+    // Platform properties
+    const platform = { x: 100, y: 300, width: 200, height: 20 };
 
     // Player properties
     const player = {
-      x: platform.x + 10, // Spawn player slightly off-center on the platform
-      y: platform.y - 50, // Position player above the platform
+      x: platform.x + 10,
+      y: platform.y - 50,
       size: 50,
       velocityY: 0,
       gravity: 0.5,
-      isOnPlatform: true, // Assume player starts on the platform
-      speed: 2, // Player speed for left/right movement
-      jumpPower: -10 // Jump power
+      isOnPlatform: false,
+      speed: 2,
+      jumpPower: -10
     };
 
     // Background properties
-    const background = {
-      x: 0,
-      speed: 1 // Speed of the background scrolling
-    };
+    const background = { x: 0, speed: 1 };
 
     function update() {
-      // Player movement (A/D keys and Arrow keys)
-      if (keys['ArrowRight'] || keys['d']) {
-        player.x += player.speed;
-        background.x -= background.speed; // Scroll the background
-      }
-      if (keys['ArrowLeft'] || keys['a']) {
-        player.x -= player.speed;
-        background.x += background.speed; // Scroll the background
-      }
+      // Handle player movement
+      if (keys['ArrowRight'] || keys['d']) movePlayer(player.speed);
+      if (keys['ArrowLeft'] || keys['a']) movePlayer(-player.speed);
+      if ((keys['ArrowUp'] || keys['w']) && player.isOnPlatform) jump();
 
-      // Jumping (W key or Up Arrow)
-      if ((keys['ArrowUp'] || keys['w']) && player.isOnPlatform) {
-        player.velocityY = player.jumpPower;
-        player.isOnPlatform = false; // Set to false when jumping
-      }
-
-      // Gravity and platform collision
+      // Apply gravity
       player.velocityY += player.gravity;
       player.y += player.velocityY;
 
-      // Check for landing on the platform
+      // Check for platform collision
+      handlePlatformCollision();
+
+      // Reset player position if they fall below the canvas
+      if (player.y + player.size > canvas.height) resetPlayer();
+    }
+
+    function movePlayer(direction) {
+      player.x += direction;
+      background.x += (direction > 0 ? -background.speed : background.speed); // Scroll the background
+    }
+
+    function jump() {
+      player.velocityY = player.jumpPower;
+      player.isOnPlatform = false; // Set to false when jumping
+    }
+
+    function handlePlatformCollision() {
       if (player.x + player.size > platform.x && player.x < platform.x + platform.width) {
-        if (player.y + player.size >= platform.y) { // Check if player is above the platform
+        if (player.y + player.size >= platform.y && player.y + player.size <= platform.y + player.velocityY) {
           player.y = platform.y - player.size; // Land on top of platform
           player.velocityY = 0;
           player.isOnPlatform = true; // Reset jumping ability
         }
       }
+    }
 
-      // Example reset position for demonstration
-      if (player.y + player.size > canvas.height) {
-        player.y = canvas.height - player.size; // Reset player to ground level
-        player.velocityY = 0;
-        player.isOnPlatform = false; // Prevent landing if on the ground
-      }
+    function resetPlayer() {
+      player.y = canvas.height - player.size; // Reset player to ground level
+      player.velocityY = 0;
+      player.isOnPlatform = false; // Prevent landing if on the ground
     }
 
     function draw() {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw scrolling background (you can implement an actual background image)
-      ctx.fillStyle = 'lightblue'; // Example background color
-      ctx.fillRect(background.x, 0, canvas.width * 2, canvas.height); // Adjust for scrolling effect
-
-      // Draw platform
-      ctx.fillStyle = 'black';
-      ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-
-      // Draw player
-      ctx.drawImage(playerImage, player.x, player.y, player.size, player.size);
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+      ctx.fillStyle = 'lightblue'; // Background color
+      ctx.fillRect(background.x, 0, canvas.width * 2, canvas.height); // Scrolling effect
+      ctx.fillStyle = 'black'; // Platform color
+      ctx.fillRect(platform.x, platform.y, platform.width, platform.height); // Draw platform
+      ctx.drawImage(playerImage, player.x, player.y, player.size, player.size); // Draw player
     }
 
     const keys = {};
-    window.addEventListener('keydown', (e) => {
-      keys[e.key] = true;
-    });
-    window.addEventListener('keyup', (e) => {
-      keys[e.key] = false;
-    });
+    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    window.addEventListener('keyup', (e) => keys[e.key] = false);
 
     function gameLoop() {
       update();
       draw();
-      requestAnimationFrame(gameLoop);
+      requestAnimationFrame(gameLoop); // Keep the game running
     }
 
-    playerImage.onload = () => requestAnimationFrame(gameLoop);
+    playerImage.onload = gameLoop; // Start the game loop when the image loads
   </script>
 </body>
 </html>
