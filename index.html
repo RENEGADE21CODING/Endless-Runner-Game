@@ -190,22 +190,30 @@
     clickCash.style.transform = 'scale(1)'; // Return to normal size
   });
 
-  // Player movement
+  // Player movement and jumping
   let isJumping = false;
   let playerVelocityY = 0;
   const gravity = 0.5; // Gravity value
+  const keys = { left: false, right: false, jump: false }; // Track key states
 
   document.addEventListener('keydown', (event) => {
-    const playerRect = player.getBoundingClientRect();
-    const platformRect = platform.getBoundingClientRect();
-
     if (event.key === 'a' || event.key === 'ArrowLeft') {
-      player.style.left = `${player.offsetLeft - 5}px`; // Move left
+      keys.left = true; // Set left key state
     } else if (event.key === 'd' || event.key === 'ArrowRight') {
-      player.style.left = `${player.offsetLeft + 5}px`; // Move right
-    } else if ((event.key === 'w' || event.key === 'ArrowUp') && !isJumping) {
-      isJumping = true;
-      playerVelocityY = -10; // Set an initial upward velocity for jumping
+      keys.right = true; // Set right key state
+    } else if (event.key === 'w' || event.key === 'ArrowUp') {
+      if (!isJumping) {
+        isJumping = true; // Set jumping state
+        playerVelocityY = -10; // Set upward velocity for jumping
+      }
+    }
+  });
+
+  document.addEventListener('keyup', (event) => {
+    if (event.key === 'a' || event.key === 'ArrowLeft') {
+      keys.left = false; // Clear left key state
+    } else if (event.key === 'd' || event.key === 'ArrowRight') {
+      keys.right = false; // Clear right key state
     }
   });
 
@@ -213,21 +221,34 @@
     // Apply gravity
     if (isJumping) {
       playerVelocityY += gravity; // Increase downward velocity
-      const newPosition = player.offsetTop + playerVelocityY;
+      const newPositionY = player.offsetTop + playerVelocityY;
 
       // Check for collision with platform
-      if (newPosition >= platform.offsetTop - player.offsetHeight && 
-          newPosition <= platform.offsetTop + platform.offsetHeight) {
+      if (newPositionY >= platform.offsetTop - player.offsetHeight &&
+          newPositionY <= platform.offsetTop + platform.offsetHeight) {
         // Reset jump
         isJumping = false;
         playerVelocityY = 0; // Reset vertical velocity
         player.style.top = `${platform.offsetTop - player.offsetHeight}px`; // Position on top of the platform
-      } else if (newPosition < platform.offsetTop) {
-        player.style.top = `${newPosition}px`; // Apply the jump position
       } else {
-        player.style.top = `${platform.offsetTop}px`; // Prevent falling through the platform
-        isJumping = false; // Reset jumping
+        player.style.top = `${newPositionY}px`; // Apply the jump position
       }
+    }
+
+    // Horizontal movement
+    if (keys.left) {
+      player.style.left = `${player.offsetLeft - 5}px`; // Move left
+    }
+    if (keys.right) {
+      player.style.left = `${player.offsetLeft + 5}px`; // Move right
+    }
+
+    // Prevent player from going out of bounds
+    if (player.offsetLeft < 0) {
+      player.style.left = '0px'; // Left boundary
+    }
+    if (player.offsetLeft + player.offsetWidth > window.innerWidth) {
+      player.style.left = `${window.innerWidth - player.offsetWidth}px`; // Right boundary
     }
   }
 
