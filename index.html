@@ -26,7 +26,7 @@
       overflow: hidden; /* Hide overflow for scrolling effect */
     }
     .settings-button {
-      background: url('https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/JellySettingsButton.png') no-repeat center;
+      background: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/JellySettingsButton.png?raw=true') no-repeat center;
       background-size: contain;
       width: 60px;
       height: 60px;
@@ -49,129 +49,45 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Load images
     const playerImage = new Image();
-    playerImage.src = 'https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/CursorCoin.png';
+    playerImage.src = 'https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true';
 
-    // Game elements
-    const platform = { x: 100, y: 300, width: 200, height: 20 };
-    const wall = { x: platform.x + platform.width / 2 - 10, y: platform.y - 100, width: 20, height: 100 };
-    const player = {
-      x: platform.x + 10,
-      y: platform.y - 50,
-      size: 50,
-      velocityY: 0,
+    let player = {
+      x: 100,
+      y: 300,
+      width: 50,
+      height: 50,
+      dy: 0,
       gravity: 0.5,
-      speed: 2,
-      jumpPower: -10,
-      isOnPlatform: false,
-      canWallJump: true, // Allow wall jump initially
-      wallJumped: false,  // Track if wall jump has occurred
-      respawning: false // Flag for respawning
+      jumpStrength: -10,
+      isOnGround: false,
+      hasWallJump: false
     };
 
-    const keys = {};
-    window.addEventListener('keydown', e => keys[e.key] = true);
-    window.addEventListener('keyup', e => keys[e.key] = false);
-
-    function update() {
-      if (player.respawning) return; // Skip updates if respawning
-
-      // Horizontal movement
-      player.x += (keys['ArrowRight'] || keys['d'] ? player.speed : 0) - (keys['ArrowLeft'] || keys['a'] ? player.speed : 0);
-
-      // Jumping
-      if ((keys['ArrowUp'] || keys['w']) && (player.isOnPlatform || (player.canWallJump && !player.wallJumped))) {
-        jump();
-      }
-
-      // Gravity
-      player.velocityY += player.gravity;
-      player.y += player.velocityY;
-
-      // Collision detection
-      handleCollisions();
-
-      // Reset player if they fall below the screen
-      if (player.y + player.size > canvas.height) resetPlayer();
+    function drawPlayer() {
+      ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
     }
 
-    function jump() {
-      player.velocityY = player.isOnPlatform ? player.jumpPower : (player.canWallJump && !player.wallJumped ? player.jumpPower * 0.5 : 0);
-      player.isOnPlatform = false;
-
-      // Set wall jump flag if jumping off a wall
-      if (player.canWallJump && !player.wallJumped) {
-        player.wallJumped = true; // Mark that wall jump has occurred
+    function updateGame() {
+      // Gravity and jump mechanics here
+      if (!player.isOnGround) {
+        player.dy += player.gravity;
       }
-    }
+      player.y += player.dy;
 
-    function handleCollisions() {
-      // Platform collision
-      if (player.x + player.size > platform.x && player.x < platform.x + platform.width) {
-        if (player.y + player.size >= platform.y && player.y + player.size <= platform.y + player.velocityY) {
-          player.y = platform.y - player.size;
-          player.velocityY = 0;
-          player.isOnPlatform = true;
-          player.canWallJump = true; // Reset wall jump ability when landing on platform
-          player.wallJumped = false; // Allow another wall jump when landing on a platform
-        }
+      if (player.y > canvas.height - player.height) { // respawn if player falls off
+        setTimeout(() => {
+          player.y = 300;
+          player.dy = 0;
+        }, 500);
       }
 
-      // Wall collision
-      const playerBottom = player.y + player.size;
-      const playerRight = player.x + player.size;
-      const horizontalOverlap = playerRight > wall.x && player.x < wall.x + wall.width;
-      const verticalOverlap = playerBottom > wall.y && player.y < wall.y + wall.height;
-
-      if (horizontalOverlap && verticalOverlap) {
-        if (player.velocityY > 0 && playerBottom - player.velocityY <= wall.y) {
-          player.y = wall.y - player.size;
-          player.velocityY = 0;
-          player.isOnPlatform = true;
-          player.canWallJump = true; // Reset wall jump ability when landing on wall
-          player.wallJumped = false; // Allow another wall jump when landing on a wall
-        } else if (player.velocityY < 0 && player.y - player.velocityY >= wall.y + wall.height) {
-          player.y = wall.y + wall.height;
-          player.velocityY = 0;
-        } else {
-          player.x = (player.x < wall.x) ? wall.x - player.size : wall.x + wall.width;
-        }
-      } else if (horizontalOverlap) {
-        player.canWallJump = true; // Allow wall jump if touching the wall
-      }
-    }
-
-    function resetPlayer() {
-      player.respawning = true; // Set respawning flag
-      setTimeout(() => {
-        player.x = platform.x + 10;
-        player.y = platform.y - 50; // Spawn above the platform
-        player.velocityY = 0;
-        player.isOnPlatform = false;
-        player.canWallJump = false; // Prevent immediate wall jump after respawn
-        player.wallJumped = false; // Reset wall jump flag
-        player.respawning = false; // Reset respawning flag
-      }, 500); // Wait for 0.5 seconds before respawning
-    }
-
-    function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#eaeaea'; // Very light gray background for game area
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'black';
-      ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-      ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-      ctx.drawImage(playerImage, player.x, player.y, player.size, player.size);
+      drawPlayer();
+      requestAnimationFrame(updateGame);
     }
 
-    function gameLoop() {
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
-
-    playerImage.onload = gameLoop;
+    playerImage.onload = () => updateGame();
   </script>
 </body>
 </html>
