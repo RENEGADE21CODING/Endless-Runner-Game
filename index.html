@@ -13,7 +13,7 @@
     }
     .top-bar {
       height: 20%;
-      background-color: lightgray; /* Top bar color */
+      background-color: #d3d3d3; /* Really light gray for top bar */
       display: flex;
       justify-content: flex-end;
       padding: 10px;
@@ -124,7 +124,7 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-      ctx.fillStyle = 'lightgray'; // Game background color
+      ctx.fillStyle = '#d3d3d3'; // Game background color
       ctx.fillRect(0, 0, canvas.width, canvas.height); // Draw background
       ctx.fillStyle = 'black'; // Platform color
       ctx.fillRect(platform.x, platform.y, platform.width, platform.height); // Draw platform
