@@ -65,21 +65,29 @@
       text-align: center;
     }
     .game-bar {
-      width: 100%;
-      height: 80vh; /* Takes up the bottom 80% of the screen */
       position: relative;
-      overflow: hidden; /* Hide overflow to create a viewport effect */
-      background-color: #ffffff; /* Change this to your desired background */
+      width: 100%;
+      height: 80vh; /* 80% of the screen height */
+      background-color: #f0f0f0; /* Light gray for game bar */
+      overflow: hidden; /* Hide overflow for camera effect */
+    }
+    .platform {
+      position: absolute;
+      background-color: #2b0001; /* Platform color */
+      width: 20%; /* 20% of screen width */
+      height: 20px; /* Height of the platform */
+      bottom: 20%; /* Positioning from the bottom */
+      left: 40%; /* Centered in the game bar */
     }
     .player {
-      width: 50px; /* Player character width */
-      height: 50px; /* Player character height */
-      background-image: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true'); /* Use your player image */
-      background-size: cover; /* Scale the image to cover the entire div */
       position: absolute;
-      bottom: 50px; /* Initial position above the ground */
-      left: calc(50% - 25px); /* Center player horizontally */
-      transition: left 0.1s; /* Smooth horizontal movement */
+      width: 40px; /* Width of the player */
+      height: 40px; /* Height of the player */
+      background-image: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true'); /* Player image */
+      background-size: cover; /* Cover the entire div with the image */
+      bottom: 60%; /* Start above the platform */
+      left: 50%; /* Centered in the game bar */
+      transform: translateX(-50%); /* Centering */
     }
   </style>
 </head>
@@ -103,7 +111,8 @@
 <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
 
 <div class="game-bar">
-  <div class="player" id="playerCharacter"></div>
+  <div class="platform" id="platform"></div>
+  <div class="player" id="player"></div>
 </div>
 
 <script>
@@ -119,7 +128,8 @@
   const upgradeAutomaticButton = document.getElementById('upgradeAutomaticButton');
   const clickInfo = document.getElementById('clickInfo');
   const automaticInfo = document.getElementById('automaticInfo');
-  const playerCharacter = document.getElementById('playerCharacter');
+  const player = document.getElementById('player');
+  const platform = document.getElementById('platform');
 
   function updateDisplay() {
     scoreDisplay.textContent = `Cash: $${cash.toFixed(2)}`;
@@ -181,19 +191,50 @@
   });
 
   // Player movement
+  let isJumping = false;
+  let playerVelocityY = 0;
+  const gravity = 0.5; // Gravity value
+
   document.addEventListener('keydown', (event) => {
-    const player = playerCharacter;
-    const step = 5; // Movement step size
-    let currentLeft = parseInt(getComputedStyle(player).left);
+    const playerRect = player.getBoundingClientRect();
+    const platformRect = platform.getBoundingClientRect();
 
     if (event.key === 'a' || event.key === 'ArrowLeft') {
-      player.style.left = `${Math.max(0, currentLeft - step)}px`; // Move left
+      player.style.left = `${player.offsetLeft - 5}px`; // Move left
     } else if (event.key === 'd' || event.key === 'ArrowRight') {
-      player.style.left = `${Math.min(window.innerWidth - 50, currentLeft + step)}px`; // Move right
+      player.style.left = `${player.offsetLeft + 5}px`; // Move right
+    } else if ((event.key === 'w' || event.key === 'ArrowUp') && !isJumping) {
+      isJumping = true;
+      playerVelocityY = -10; // Set an initial upward velocity for jumping
     }
   });
 
-  updateDisplay(); // Ensure initial display is correct
+  function gameLoop() {
+    // Apply gravity
+    if (isJumping) {
+      playerVelocityY += gravity; // Increase downward velocity
+      const newPosition = player.offsetTop + playerVelocityY;
+
+      // Check for collision with platform
+      if (newPosition >= platform.offsetTop - player.offsetHeight && 
+          newPosition <= platform.offsetTop + platform.offsetHeight) {
+        // Reset jump
+        isJumping = false;
+        playerVelocityY = 0; // Reset vertical velocity
+        player.style.top = `${platform.offsetTop - player.offsetHeight}px`; // Position on top of the platform
+      } else if (newPosition < platform.offsetTop) {
+        player.style.top = `${newPosition}px`; // Apply the jump position
+      } else {
+        player.style.top = `${platform.offsetTop}px`; // Prevent falling through the platform
+        isJumping = false; // Reset jumping
+      }
+    }
+  }
+
+  // Initialize player position
+  player.style.top = `${window.innerHeight * 0.6}px`; // Start above the platform
+
+  setInterval(gameLoop, 16); // 60 FPS
 </script>
 
 </body>
