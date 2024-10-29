@@ -13,15 +13,17 @@
     }
     .top-bar {
       height: 20%;
-      background-color: #d3d3d3;
+      background-color: #d3d3d3; /* Really light gray for top bar */
       display: flex;
       justify-content: flex-end;
       padding: 10px;
     }
     .game-container {
-      height: 80%;
+      height: 80%; /* Full height for game container */
+      width: 100%; /* Full width for game container */
+      background-color: #eaeaea; /* Very light gray background */
       position: relative;
-      overflow: hidden;
+      overflow: hidden; /* Hide overflow for scrolling effect */
     }
     .settings-button {
       background: url('https://github.com/RENEGADE21CODING/Endless-Runner-Game/raw/main/JellySettingsButton.png') no-repeat center;
@@ -64,7 +66,8 @@
       gravity: 0.5,
       isOnPlatform: false,
       speed: 2,
-      jumpPower: -10
+      jumpPower: -10,
+      canWallJump: false // Flag to allow wall jumping
     };
 
     function update() {
@@ -73,7 +76,9 @@
       if (keys['ArrowLeft'] || keys['a']) movePlayer(-player.speed);
 
       // Jumping
-      if ((keys['ArrowUp'] || keys['w']) && player.isOnPlatform) jump();
+      if ((keys['ArrowUp'] || keys['w']) && (player.isOnPlatform || player.canWallJump)) {
+        jump();
+      }
 
       // Gravity
       player.velocityY += player.gravity;
@@ -91,7 +96,12 @@
     }
 
     function jump() {
-      player.velocityY = player.jumpPower;
+      // If the player is on a platform, perform a regular jump
+      if (player.isOnPlatform) {
+        player.velocityY = player.jumpPower; // Regular jump power
+      } else if (player.canWallJump) {
+        player.velocityY = player.jumpPower * 0.5; // 50% jump power for wall jump
+      }
       player.isOnPlatform = false;
     }
 
@@ -102,6 +112,7 @@
           player.y = platform.y - player.size;
           player.velocityY = 0;
           player.isOnPlatform = true;
+          player.canWallJump = false; // Reset wall jump ability when landing on platform
         }
       }
 
@@ -116,20 +127,22 @@
       // Resolve collision depending on which axis the player is moving
       if (horizontalOverlap && verticalOverlap) {
         if (player.velocityY > 0 && playerBottom - player.velocityY <= wall.y) { 
-          // Player collides with the top of the wall
           player.y = wall.y - player.size;
           player.velocityY = 0;
           player.isOnPlatform = true;
+          player.canWallJump = false; // Reset wall jump ability when landing on wall
         } else if (player.velocityY < 0 && player.y - player.velocityY >= wall.y + wall.height) {
-          // Player collides with the bottom of the wall
           player.y = wall.y + wall.height;
           player.velocityY = 0;
         } else if (player.x < wall.x) {
-          // Player collides with the left side of the wall
           player.x = wall.x - player.size;
         } else if (playerRight > wall.x + wall.width) {
-          // Player collides with the right side of the wall
           player.x = wall.x + wall.width;
+        }
+      } else {
+        // Allow wall jump if touching the wall
+        if (horizontalOverlap) {
+          player.canWallJump = true; // Player can wall jump only if touching the wall
         }
       }
     }
@@ -138,11 +151,12 @@
       player.y = canvas.height - player.size;
       player.velocityY = 0;
       player.isOnPlatform = false;
+      player.canWallJump = false; // Reset wall jump ability on reset
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#d3d3d3';
+      ctx.fillStyle = '#eaeaea'; // Very light gray background for game area
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = 'black';
       ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
