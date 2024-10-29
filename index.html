@@ -81,19 +81,40 @@
       ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
     }
 
+    function checkPlatformCollision() {
+      // Check if player is falling towards the platform and within platform bounds
+      if (
+        player.y + player.height >= platform.y && // Player is at or below platform's top
+        player.y + player.height <= platform.y + platform.height && // Player's bottom is within platform height
+        player.x + player.width > platform.x && // Player's right side is to the right of platform's left side
+        player.x < platform.x + platform.width // Player's left side is to the left of platform's right side
+      ) {
+        player.isOnGround = true;
+        player.y = platform.y - player.height; // Position player on top of platform
+        player.dy = 0; // Reset vertical velocity to 0
+      } else {
+        player.isOnGround = false; // Player is in the air if not touching platform
+      }
+    }
+
     function updateGame() {
       if (!player.isOnGround) {
         player.dy += player.gravity;
       }
       player.y += player.dy;
 
-      if (player.y > canvas.height - player.height) {
+      // Check collision with the platform
+      checkPlatformCollision();
+
+      // Respawn if player falls off the screen
+      if (player.y > canvas.height) {
         setTimeout(() => {
           player.y = 300;
           player.dy = 0;
         }, 500);
       }
 
+      // Clear the canvas and redraw the game elements
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawPlatform();
       drawPlayer();
