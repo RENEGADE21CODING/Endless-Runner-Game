@@ -65,11 +65,13 @@
     };
 
     const platform = {
-      x: 50,
+      x: 100,
       y: 400,
-      width: 160,
+      width: 300,
       height: 20,
-      color: '#2b0001'
+      color: '#2b0001',
+      stemWidth: 20,
+      stemHeight: 100
     };
 
     function drawPlayer() {
@@ -77,23 +79,28 @@
     }
 
     function drawPlatform() {
+      // Draw the horizontal platform
       ctx.fillStyle = platform.color;
       ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+      
+      // Draw the vertical "stem" for the upside-down "T" shape
+      const stemX = platform.x + platform.width / 2 - platform.stemWidth / 2;
+      ctx.fillRect(stemX, platform.y - platform.stemHeight, platform.stemWidth, platform.stemHeight);
     }
 
     function checkPlatformCollision() {
-      // Check if player is falling towards the platform and within platform bounds
+      // Detect collision only if the player is falling and within platform's horizontal bounds
       if (
-        player.y + player.height >= platform.y && // Player is at or below platform's top
-        player.y + player.height <= platform.y + platform.height && // Player's bottom is within platform height
-        player.x + player.width > platform.x && // Player's right side is to the right of platform's left side
-        player.x < platform.x + platform.width // Player's left side is to the left of platform's right side
+        player.dy >= 0 && // Player is falling
+        player.y + player.height <= platform.y + platform.height && // Player is above platform
+        player.y + player.height >= platform.y && // Player's bottom reaches platform top
+        player.x + player.width > platform.x && // Player's right side intersects platform's left side
+        player.x < platform.x + platform.width // Player's left side intersects platform's right side
       ) {
         player.isOnGround = true;
-        player.y = platform.y - player.height; // Position player on top of platform
-        player.dy = 0; // Reset vertical velocity to 0
+        player.dy = 0; // Stop downward movement
       } else {
-        player.isOnGround = false; // Player is in the air if not touching platform
+        player.isOnGround = false;
       }
     }
 
