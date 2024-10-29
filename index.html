@@ -64,6 +64,22 @@
       color: black;
       text-align: center;
     }
+    .game-bar {
+      width: 100%;
+      height: 80vh; /* Takes up the bottom 80% of the screen */
+      position: relative;
+      overflow: hidden; /* Hide overflow to create a viewport effect */
+      background-color: #ffffff; /* Change this to your desired background */
+    }
+    .player {
+      width: 50px; /* Player character width */
+      height: 50px; /* Player character height */
+      background-color: #ff0000; /* Change to your desired player color */
+      position: absolute;
+      bottom: 50px; /* Initial position above the ground */
+      left: calc(50% - 25px); /* Center player horizontally */
+      transition: left 0.1s; /* Smooth horizontal movement */
+    }
   </style>
 </head>
 <body>
@@ -85,6 +101,10 @@
 
 <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
 
+<div class="game-bar">
+  <div class="player" id="playerCharacter"></div>
+</div>
+
 <script>
   let cash = 0;
   let cashPerClick = 1.00; // Set initial cash per click to $1.00
@@ -98,6 +118,7 @@
   const upgradeAutomaticButton = document.getElementById('upgradeAutomaticButton');
   const clickInfo = document.getElementById('clickInfo');
   const automaticInfo = document.getElementById('automaticInfo');
+  const playerCharacter = document.getElementById('playerCharacter');
 
   function updateDisplay() {
     scoreDisplay.textContent = `Cash: $${cash.toFixed(2)}`;
@@ -156,6 +177,19 @@
   clickCash.addEventListener('mouseleave', () => {
     clickCash.style.filter = 'brightness(0.9)'; // Darkened when not hovered
     clickCash.style.transform = 'scale(1)'; // Return to normal size
+  });
+
+  // Player movement
+  document.addEventListener('keydown', (event) => {
+    const player = playerCharacter;
+    const step = 5; // Movement step size
+    let currentLeft = parseInt(getComputedStyle(player).left);
+
+    if (event.key === 'a' || event.key === 'ArrowLeft') {
+      player.style.left = `${Math.max(0, currentLeft - step)}px`; // Move left
+    } else if (event.key === 'd' || event.key === 'ArrowRight') {
+      player.style.left = `${Math.min(window.innerWidth - 50, currentLeft + step)}px`; // Move right
+    }
   });
 
   updateDisplay(); // Ensure initial display is correct
