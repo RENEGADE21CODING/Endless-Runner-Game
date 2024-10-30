@@ -52,11 +52,9 @@
       right: 2%;
       cursor: pointer;
       transition: transform 0.1s;
-      filter: brightness(0.9); /* Darkened gradient */
     }
     .click-cash:hover {
       transform: scale(1.2);
-      filter: brightness(1);
     }
     .setting-button {
       width: 60px; /* Larger settings button */
@@ -91,10 +89,15 @@
 
 <script>
   let cash = 0;
-  let cashPerClick = 1.00; // Set initial cash per click to $1.00 if it's 0.00
+  let cashPerClick = 0.50; // Set initial cash per click to $0.50
   let cashPerSecond = 0;
   let upgradeClickCost = 10.00; // Starting cost set to $10.00
   let upgradeAutomaticCost = 10.00; // Starting cost set to $10.00
+
+  // Check if cashPerClick is $0.00 and set it to $0.50
+  if (cashPerClick === 0.00) {
+      cashPerClick = 0.50;
+  }
 
   const clickCash = document.getElementById('clickCash');
   const scoreDisplay = document.getElementById('scoreDisplay');
@@ -112,6 +115,11 @@
   clickCash.addEventListener('click', () => {
     cash += cashPerClick;
     updateDisplay();
+    // Pulsing effect
+    clickCash.style.transform = 'scale(1.1)';
+    setTimeout(() => {
+      clickCash.style.transform = 'scale(1)';
+    }, 100);
   });
 
   upgradeClickButton.addEventListener('click', () => {
@@ -138,6 +146,7 @@
     }
   });
 
+  // Function to increment cash every second
   setInterval(() => {
     cash += cashPerSecond;
     updateDisplay();
