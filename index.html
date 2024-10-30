@@ -1,168 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Platicker - A Platform Clicker Game</title>
-  <link rel="icon" href="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true" type="image/png">
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0;
-      background-color: #f0f0f0;
-      overflow: hidden;
-    }
-    .top-bar {
-      width: 100%;
-      height: 20vh;
-      background-color: #b0c4de;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1em;
-      box-sizing: border-box;
-    }
-    .score {
-      color: white;
-      font-size: 2.5em;
-    }
-    .upgrades {
-      display: flex;
-      gap: 1em;
-    }
-    .upgrade-button {
-      padding: 10px 20px;
-      font-size: 1em;
-      color: black;
-      background-color: #d1ffd1;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: transform 0.1s;
-    }
-    .upgrade-button:active {
-      transform: scale(0.95);
-    }
-    .click-cash {
-      width: 120px;
-      height: auto;
-      position: absolute;
-      right: 2%;
-      bottom: 25%;
-      cursor: pointer;
-      transition: transform 0.1s, filter 0.1s;
-      filter: brightness(0.9);
-    }
-    .setting-button {
-      width: 60px;
-      height: 60px;
-      cursor: pointer;
-    }
-    .game-bar {
-      position: relative;
-      width: 100%;
-      height: 80vh;
-      background-color: #f0f0f0;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .platform {
-      position: absolute;
-      width: 20%;
-      height: 20px;
-      background-color: #2b0001;
-      left: 40%;
-      top: 60%;
-    }
-    .player {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background-image: url('https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/CursorCoin.png?raw=true');
-      background-size: cover;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platicker - Stickman Animation</title>
+    <style>
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; }
+        canvas { border: 1px solid #000; }
+    </style>
 </head>
 <body>
-  <div class="top-bar">
-    <div class="score" id="scoreDisplay">Cash: $0.00</div>
-    <div class="upgrades">
-      <div>
-        <button class="upgrade-button" id="upgradeClickButton">Buy More Cash Per Click (Cost: $10.00)</button>
-        <div class="upgrade-info" id="clickInfo">Current Cash Per Click: $1.00</div>
-      </div>
-      <div>
-        <button class="upgrade-button" id="upgradeAutomaticButton">Buy More Cash Per Second (Cost: $10.00)</button>
-        <div class="upgrade-info" id="automaticInfo">Current Cash Per Second: $0.00</div>
-      </div>
-    </div>
-    <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/JellySettingsButton.png?raw=true" class="setting-button" id="settingsButton">
-  </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const spriteSheet = new Image();
+        spriteSheet.src = 'path/to/your/spritesheet.png'; // Replace with your sprite sheet URL
 
-  <div class="game-bar" id="gameBar">
-    <div class="platform" id="platform"></div>
-    <div class="player" id="player"></div>
-    <img src="https://github.com/RENEGADE21CODING/Platicker-A_Platform_Clicker_Game/blob/main/ClickCursorCash.png?raw=true" class="click-cash" id="clickCash">
-  </div>
+        const spriteWidth = 50; // Width of a single sprite frame
+        const spriteHeight = 100; // Height of a single sprite frame
 
-  <script>
-    const player = document.getElementById('player');
-    const platform = document.getElementById('platform');
-    const gameBar = document.getElementById('gameBar');
-    let playerX = gameBar.clientWidth / 2 - 25; 
-    let playerY = platform.offsetTop - 50; 
-    let playerVelocityX = 0;
-    let playerVelocityY = 0;
-    let gravity = 0.5;
-    let isOnGround = false;
+        const stickmanAnimations = {
+            idle: { frames: [0, 1, 2], speed: 100 },
+            walk: { frames: [3, 4, 5, 6], speed: 100 },
+            run: { frames: [7, 8, 9, 10], speed: 50 },
+            jump: { frames: [11, 12], speed: 100 },
+            fall: { frames: [13, 14], speed: 100 },
+        };
 
-    function updatePlayerPosition() {
-      playerVelocityY += gravity;
-      playerY += playerVelocityY;
+        let currentAnimation = 'idle';
+        let currentFrame = 0;
+        let frameCount = 0;
+        let playerX = canvas.width / 2 - spriteWidth / 2; // Initial player position
+        let playerY = canvas.height - spriteHeight; // Start on the ground
 
-      if (playerY + player.clientHeight >= platform.offsetTop && playerX + player.clientWidth > platform.offsetLeft && playerX < platform.offsetLeft + platform.clientWidth) {
-        playerY = platform.offsetTop - player.clientHeight;
-        isOnGround = true;
-        playerVelocityY = 0;
-      } else {
-        isOnGround = false;
-      }
+        function update() {
+            frameCount++;
+            const animation = stickmanAnimations[currentAnimation];
 
-      playerX += playerVelocityX;
-      player.style.left = `${playerX}px`;
-      player.style.top = `${playerY}px`;
+            if (frameCount >= animation.speed) {
+                currentFrame = (currentFrame + 1) % animation.frames.length;
+                frameCount = 0;
+            }
 
-      const centerX = gameBar.clientWidth / 2 - player.clientWidth / 2;
-      const centerY = gameBar.clientHeight / 2 - player.clientHeight;
-      gameBar.scrollLeft = playerX - centerX;
-      gameBar.scrollTop = playerY - centerY;
-    }
+            // Add gravity and jumping logic here if needed
+        }
 
-    function movePlayer(e) {
-      if (e.key === 'a' || e.key === 'ArrowLeft') {
-        playerVelocityX = -5;
-      } else if (e.key === 'd' || e.key === 'ArrowRight') {
-        playerVelocityX = 5;
-      } else if ((e.key === 'w' || e.key === 'ArrowUp') && isOnGround) {
-        playerVelocityY = -12;
-        isOnGround = false;
-      }
-    }
+        function draw() {
+            const animation = stickmanAnimations[currentAnimation];
+            const frameX = animation.frames[currentFrame] * spriteWidth;
+            const frameY = 0; // Adjust based on your sprite sheet layout
 
-    function stopPlayer(e) {
-      if (e.key === 'a' || e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'ArrowRight') {
-        playerVelocityX = 0;
-      }
-    }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(spriteSheet, frameX, frameY, spriteWidth, spriteHeight, playerX, playerY, spriteWidth, spriteHeight);
+        }
 
-    setInterval(updatePlayerPosition, 20);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowRight') {
+                currentAnimation = 'run';
+                playerX += 5; // Move right
+            } else if (e.code === 'ArrowLeft') {
+                currentAnimation = 'walk';
+                playerX -= 5; // Move left
+            } else if (e.code === 'Space') {
+                currentAnimation = 'jump';
+                // Add jump logic here
+            }
+        });
 
-    document.addEventListener('keydown', movePlayer);
-    document.addEventListener('keyup', stopPlayer);
-  </script>
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
+                currentAnimation = 'idle'; // Return to idle
+            }
+        });
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        spriteSheet.onload = () => {
+            gameLoop(); // Start the game loop once the sprite sheet is loaded
+        };
+    </script>
 </body>
 </html>
