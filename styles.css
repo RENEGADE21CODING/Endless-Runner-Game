@@ -129,7 +129,7 @@ body {
   transition: background-color 0.3s, opacity 0.3s;
 }
 
-.login-button {
+.account-button {
   background: linear-gradient(to bottom, #218838, #4caf50); /* Green gradient */
 }
 
