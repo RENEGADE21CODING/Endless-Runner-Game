@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Course Cursor</title>
   <link rel="icon" href="images/CursorCoin.png" type="image/png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/top-bar.css">
+  <link rel="stylesheet" href="styles/game-bar.css">
+  <link rel="stylesheet" href="styles/popups.css">
+  <link rel="stylesheet" href="styles/responsive.css">
+  <link rel="stylesheet" href="styles/score-animation.css">
 </head>
 <body>
 
@@ -13,13 +19,13 @@
   <div class="score" id="scoreDisplay">$0.00</div>
   <div class="upgrades">
     <div>
-      <img src="images/Click Power Upgrade (Buy More Cash Per Click).png" alt="Upgrade Cash Per Click" class="upgrade-image" id="upgradeClickButton">
       <div class="upgrade-info" id="clickInfo">Value: $0.50</div>
+      <img src="images/Click Power Upgrade (Buy More Cash Per Click).png" alt="Upgrade Cash Per Click" class="upgrade-image" id="upgradeClickButton">
       <div class="upgrade-cost" id="clickCost">Cost: $10.00</div>
     </div>
     <div>
-      <img src="images/Cash Clock Upgrade (Buy More Cash Per Second).png" alt="Upgrade Cash Per Second" class="upgrade-image" id="upgradeAutomaticButton">
       <div class="upgrade-info" id="automaticInfo">Value: $0.25</div>
+      <img src="images/Cash Clock Upgrade (Buy More Cash Per Second).png" alt="Upgrade Cash Per Second" class="upgrade-image" id="upgradeAutomaticButton">  
       <div class="upgrade-cost" id="automaticCost">Cost: $10.00</div>
     </div>
   </div>
@@ -94,7 +100,16 @@
   </div>
 </div>
 
-<script src="script.js" defer></script>
+<!-- Modularized JavaScript Files -->
+<script src="scripts/gameState.js" defer></script>
+<script src="scripts/domElements.js" defer></script>
+<script src="scripts/soundTrackTabs.js" defer></script>
+<script src="scripts/display.js" defer></script>
+<script src="scripts/storage.js" defer></script>
+<script src="scripts/eventListeners.js" defer></script>
+<script src="scripts/popups.js" defer></script>
+<script src="scripts/loadSavedData.js" defer></script>
+
 
 </body>
 </html>
